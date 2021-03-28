@@ -29,17 +29,17 @@ class Player:
     rot_speed:float = 0.1
     l_size:int = 5
     
-    fov:int = 180
+    fov:int = 90
     map:Map = Map()
     
     def update(self):
         if hasattr(self, 'rect') == False:
             self.calc_delta()
-            self.rect = pygame.Rect(self.get_tl()[0], self.get_tl()[1], self.size, self.size)
+            self.rect = pygame.Rect(self.get_topleft()[0], self.get_topleft()[1], self.size, self.size)
 
         else:
             self.move(pygame.key.get_pressed())
-            self.rect.topleft = self.get_tl()
+            self.rect.topleft = self.get_topleft()
     
     def move(self, keys):
         if keys[pygame.K_w] and keys[pygame.K_s] == False:
@@ -60,7 +60,7 @@ class Player:
         self.calc_delta()
         
     def closest_int(self, n, closest):
-        return int((int(int(n)>>6)<<6) -0.001)
+        return (int(int(n)>>6)<<6)
     
     def line_lenght(self, pos):
         spos = [self.x, self.y]
@@ -71,6 +71,7 @@ class Player:
         h = self.cast_hray(ray_angle)
         v_l = self.line_lenght(v)
         h_l = self.line_lenght(h)
+        
         if v_l < h_l:
             return v
         if h_l < v_l:
@@ -78,26 +79,25 @@ class Player:
     
     def cast_hray(self, ray_angle, checks = 8):
         tan_ = tan(ray_angle)
-        if tan_ == 0:
-            neg_tan = 0
-        else:
-            neg_tan = -1/tan(ray_angle)
+        
+        if tan_ != 0:
+            tan_ = -1/tan(ray_angle)
 
         calc_off = [0, checks]
             
         if ray_angle > pi: #looking up
-            ray_y = self.closest_int(self.y, self.map.size)
-            ray_x = (self.y - ray_y) * neg_tan + self.x
+            ray_y = self.closest_int(self.y, self.map.size) - 1
+            ray_x = (self.y - ray_y) * tan_ + self.x
             off_y = -self.map.size
-            off_x = -off_y * neg_tan
+            off_x = -off_y * tan_
             
         if ray_angle < pi: #looking down
-            ray_y = self.closest_int(self.y, self.map.size) + 65
-            ray_x = (self.y - ray_y) * neg_tan + self.x
+            ray_y = self.closest_int(self.y, self.map.size) + 64
+            ray_x = (self.y - ray_y) * tan_ + self.x
             off_y = self.map.size
-            off_x = -off_y * neg_tan
+            off_x = -off_y * tan_
             
-        if ray_angle == 0 or ray_angle == pi:
+        if ray_angle == 0 or ray_angle == pi: #looking left or right
             ray_x = self.x
             ray_y = self.y
             calc_off[0] = calc_off[1]
@@ -107,15 +107,16 @@ class Player:
             map_x = int(ray_x / self.map.size)
             map_y = int(ray_y / self.map.size)
             
+            #check if hit wall
             if map_x < self.map.width and map_y < self.map.height and map_x > -1 and map_y > -1 and self.map.array[map_y][map_x] == 1:
-                    #hit wall
+                #hit wall
                 calc_off[0] = calc_off[1]
-
+            #if not add offset
             else:
                 ray_x += off_x
                 ray_y += off_y
                 calc_off[0] += 1
-                
+        
         return [ray_x, ray_y]
     
     def cast_vray(self, ray_angle, checks = 8):
@@ -123,20 +124,20 @@ class Player:
         calc_off = [0, checks]
             
         if ray_angle > pi / 2 and ray_angle < pi + pi / 2: #looking left
-            ray_x = self.closest_int(self.x, self.map.size)
+            ray_x = self.closest_int(self.x, self.map.size) - 1
             ray_y = ((self.x - ray_x) * neg_tan + self.y)
             
             off_x = -self.map.size
             off_y = -off_x * neg_tan
             
         if ray_angle > pi + pi / 2 or ray_angle < pi / 2: #looking right
-            ray_x = self.closest_int(self.x, self.map.size) + 65
+            ray_x = self.closest_int(self.x, self.map.size) + 64
             ray_y = (self.x - ray_x) * neg_tan + self.y
             
             off_x = self.map.size
             off_y = -off_x * neg_tan
             
-        if ray_angle == pi / 2 or ray_angle == pi + pi / 2:
+        if ray_angle == pi / 2 or ray_angle == pi + pi / 2: #looking up or down
             ray_x = self.x
             ray_y = self.y
             calc_off[0] = calc_off[1]
@@ -146,10 +147,12 @@ class Player:
             map_x = int(ray_x / self.map.size)
             map_y = int(ray_y / self.map.size)
             
+            #check if hit wall
             if map_x < self.map.width and map_y < self.map.height and map_x > -1 and map_y > -1 and self.map.array[map_y][map_x] == 1:
-                    #hit wall
+                #hit wall
                 calc_off[0] = calc_off[1]
-
+                
+            #if not hit wall add offset
             else:
                 ray_x += off_x
                 ray_y += off_y
@@ -169,7 +172,7 @@ class Player:
         self.l_pos = (self.x + self.deltax * self.l_size,
                       (self.y + self.deltay * self.l_size) - 1)
                 
-    def get_tl(self):
+    def get_topleft(self):
         x = self.x - int(self.size / 2)
         y = self.y - int(self.size / 2)
         return (x, y)
