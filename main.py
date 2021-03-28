@@ -53,11 +53,20 @@ class Game:
         #Regular stuff
         pygame.display.flip()
         
-    def draw_rays(self, angle, n):
-        angle -= (n/2) * DEG
+    def draw_rays(self, angle, n, frequency = 2):
+        angle -= (n/2) * (DEG * frequency)
+        if angle > pi * 2:
+            angle -= pi * 2
+        if angle < 0:
+            angle += pi * 2
+            
         for i in range(n):
             pygame.draw.line(self.screen, (200, 20, 60), (self.player.x, self.player.y), self.player.cast_ray(angle))
-            angle += DEG
+            angle += (DEG * frequency)
+            if angle > pi * 2:
+                angle -= pi * 2
+            if angle < 0:
+                angle += pi * 2
         
     def main_loop(self):
         while True:
@@ -70,7 +79,6 @@ class Game:
                     sys.exit()
                     
             self.player.update()
-            print(self.player.angle)
             self.render()
             self.clock.tick(self.settings.fps)
             

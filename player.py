@@ -7,10 +7,10 @@ class Map:
     array = [
         [1, 1, 1, 1, 1, 1, 1, 1],
         [1, 0, 1, 1, 1, 0, 0 ,1],
-        [1, 0, 1, 1, 1, 1, 0, 1],
-        [1, 0, 1, 1, 1, 1, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 1, 0, 1],
+        [1, 0, 1, 1, 1, 0, 0, 1],
+        [1, 0, 1, 0, 1, 0, 0, 1],
+        [1, 0, 1, 1, 1, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 1],
         [1, 1, 1, 1, 1, 1, 1, 1]
     ]
@@ -29,7 +29,7 @@ class Player:
     rot_speed:float = 0.1
     l_size:int = 5
     
-    fov:int = 90
+    fov:int = 180
     map:Map = Map()
     
     def update(self):
@@ -92,7 +92,7 @@ class Player:
             off_x = -off_y * neg_tan
             
         if ray_angle < pi: #looking down
-            ray_y = self.closest_int(self.y, self.map.size) + 64
+            ray_y = self.closest_int(self.y, self.map.size) + 65
             ray_x = (self.y - ray_y) * neg_tan + self.x
             off_y = self.map.size
             off_x = -off_y * neg_tan
@@ -124,13 +124,13 @@ class Player:
             
         if ray_angle > pi / 2 and ray_angle < pi + pi / 2: #looking left
             ray_x = self.closest_int(self.x, self.map.size)
-            ray_y = (self.x - ray_x) * neg_tan + self.y
+            ray_y = ((self.x - ray_x) * neg_tan + self.y)
             
             off_x = -self.map.size
             off_y = -off_x * neg_tan
             
         if ray_angle > pi + pi / 2 or ray_angle < pi / 2: #looking right
-            ray_x = self.closest_int(self.x, self.map.size) + 64
+            ray_x = self.closest_int(self.x, self.map.size) + 65
             ray_y = (self.x - ray_x) * neg_tan + self.y
             
             off_x = self.map.size
