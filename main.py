@@ -11,13 +11,9 @@ DEG = 0.0174533
 class Settings:
     screen_res = None
     game_res = None
-    first_person = True
+    first_person = False
     fps = 60
     background_color = (200, 200, 200)
-    
-@dataclass
-class Colors:
-    pygame.Color((20,20,20))
 
 class Game:
     def __init__(self):
@@ -67,12 +63,11 @@ class Game:
         pygame.draw.line(self.screen, (200, 200, 200), (self.player.x, self.player.y- 1 ), self.player.l_pos, 3)
         self.draw_text(f'fps: {self.clock.get_fps():.2f}', (10, 70))
         self.draw_text(f'mouse pos: {pygame.mouse.get_pos()}', (10, 100))
+        
         #Regular stuff
         pygame.display.flip()
         
-    def draw_text(self, text:str, pos:str = [0,0]):
-        if pos[0] == 0 and pos[1] == 0:
-            pos = [self.settings.screen_res[0]/2, self.settings.screen_res[1]/2]
+    def draw_text(self, text:str, pos:str):
         text_img = pygame.font.SysFont('Calibri', 40).render(text, True, (255,255,255))
         text_rect = text_img.get_rect()
         text_rect.topleft = tuple(pos) 
@@ -84,6 +79,7 @@ class Game:
         fov = fov/quantity
         angle -= (quantity/2) * (DEG * fov)
         
+        #check angle
         if angle > pi * 2:
             angle -= pi * 2
         if angle < 0:
@@ -95,7 +91,6 @@ class Game:
             #draw 2d
             pygame.draw.line(self.screen, (200, 20, 60), (self.player.x, self.player.y), (ray[0], ray[1]))
             
-            #draw pseudo 3d
             #get now angle
             line_width = int((self.game_sur.get_width()) / quantity)
             line_x = (i * line_width) + self.game_sur.get_width()
@@ -122,7 +117,8 @@ class Game:
                 pygame.draw.line(self.screen, ((185,40,40)), (line_x, l_length + off_line), (line_x, off_line), int(line_width))
             elif ray[2] == 'h':
                 pygame.draw.line(self.screen, ((255,60,60)), (line_x, l_length + off_line), (line_x, off_line), int(line_width))
-                      
+            
+            #add and check angle
             angle += (DEG * fov)
             if angle > pi * 2:
                 angle -= pi * 2
@@ -139,6 +135,7 @@ class Game:
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
+                #change map
                 elif event.type == pygame.MOUSEBUTTONDOWN and not self.settings.first_person:
                     if event.pos[0] <= self.game_sur.get_width() and event.pos[0] >= 0:
                         if event.pos[1] <= self.game_sur.get_height() and event.pos[1] >= 0:
@@ -148,8 +145,10 @@ class Game:
                                 self.player.map.array[y][x] = 0
                             elif self.player.map.array[y][x] == 0:
                                 self.player.map.array[y][x] = 1
+                #get mouse relative pos 
                 elif event.type == pygame.MOUSEMOTION:
                     mouse_move = event.rel
+                #change camera mode
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_QUOTE:
                     if self.settings.first_person == False:
                         self.settings.first_person = True
@@ -158,17 +157,20 @@ class Game:
                         pygame.event.set_grab(False)       
                         pygame.mouse.set_visible(True)
                         pygame.mouse.set_pos((int(self.screen.get_width()/2), int(self.screen.get_height()/2)))
+                #change lines rendering
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_1:
-                    if self.player.h_v == True:
-                        self.player.h_v = False
-                    elif self.player.h_v == False:
-                        self.player.h_v = 'both'
-                    else:
-                        self.player.h_v = True
-                        
+                    if self.player.lines == 'horizontal':
+                        self.player.lines = 'vertical'
+                    elif self.player.lines == 'vertical':
+                        self.player.lines = 'both'
+                    elif self.player.lines == 'both':
+                        self.player.lines = 'horizontal'
+            
+            #camera mode
             if self.settings.first_person:
-                pygame.event.set_grab(True)       
-                pygame.mouse.set_visible(False) 
+                pygame.event.set_grab(True)
+                pygame.mouse.set_visible(False)
+                
                 if mouse_move:
                     self.player.angle += mouse_move[0]/ 50
                                 

@@ -33,7 +33,7 @@ class Player:
     rays:int = 256
     map:Map = Map()
     
-    h_v = False
+    lines = 'both'
     
     def update(self):
         if hasattr(self, 'rect') == False:
@@ -106,15 +106,15 @@ class Player:
         v_l = self.line_lenght(v)
         h_l = self.line_lenght(h)
         
-        if self.h_v == True:
+        if self.lines == 'horizontal':
             return h
-        elif self.h_v == 'both':
+        elif self.lines == 'vertical':
+            return v
+        elif self.lines == 'both':
             if h_l < v_l:
                 return h
             if v_l < h_l:
                 return v
-        else:
-            return v
     
     def cast_hray(self, ray_angle, checks = 8):
         tan_ = tan(ray_angle)
