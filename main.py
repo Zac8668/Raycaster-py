@@ -157,6 +157,7 @@ class Game:
                         pygame.event.set_grab(False)       
                         pygame.mouse.set_visible(True)
                         pygame.mouse.set_pos((int(self.screen.get_width()/2), int(self.screen.get_height()/2)))
+                        
                 #change lines rendering
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_1:
                     if self.player.lines == 'horizontal':
